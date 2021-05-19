@@ -2,7 +2,7 @@ package Service
 
 import (
 	"fmt"
-	"github.com/zileyuan/go-umeng-push/Constants"
+	"github.com/huangapple/go-umeng-push/Constants"
 )
 
 func ExampleAndroid_Broadcast() {

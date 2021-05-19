@@ -2,10 +2,10 @@ package Service
 
 import (
 	"encoding/json"
-	"github.com/zileyuan/go-umeng-push/Constants"
-	"github.com/zileyuan/go-umeng-push/Responses/Status"
-	"github.com/zileyuan/go-umeng-push/Responses/TaskPush"
-	"github.com/zileyuan/go-umeng-push/Responses/UniCast"
+	"github.com/huangapple/go-umeng-push/Constants"
+	"github.com/huangapple/go-umeng-push/Responses/Status"
+	"github.com/huangapple/go-umeng-push/Responses/TaskPush"
+	"github.com/huangapple/go-umeng-push/Responses/UniCast"
 	"strconv"
 	"strings"
 	"time"

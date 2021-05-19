@@ -2,7 +2,7 @@ package UniCast
 
 import (
 	"encoding/json"
-	"github.com/zileyuan/go-umeng-push/Responses"
+	"github.com/huangapple/go-umeng-push/Responses"
 	"net/http"
 )
 
