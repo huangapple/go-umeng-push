@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"github.com/huangapple/go-umeng-push/Constants"
 	"github.com/huangapple/go-umeng-push/Responses/Status"
-	"github.com/huangapple/go-umeng-push/Responses/TaskPush"
 	"github.com/huangapple/go-umeng-push/Responses/UniCast"
 	"strconv"
 	"strings"
@@ -66,85 +65,14 @@ func NewAndroidClient(appKey, appSecret, envMode string) *Android {
 	return &android
 }
 
-//Broadcast廣播
-func (a *Android) Broadcast(payload AnPayload, policy Policy, option Option) (response *TaskPush.TaskPush, err error) {
-	params, err := a.getParams(payload, policy, AnCustomized{PushType: Constants.BROADCAST}, option)
-	if err != nil {
-		return response, err
-	}
-	httpResponse, err := a.sent(Constants.HOST_URL+Constants.PUSH_URI, params)
-
-	return TaskPush.New(httpResponse)
-}
-
-//單一推播
-func (a *Android) UniCast(payload AnPayload, policy Policy, option Option) (response *UniCast.UniCast, err error) {
-	params, err := a.getParams(payload, policy, AnCustomized{PushType: Constants.UNICAST}, option)
+func (a *Android) Push(payload *AnPayload, policy *Policy, anCustomized *AnCustomized, option *Option) (response *UniCast.UniCast, err error) {
+	params, err := a.getParams(payload, policy, anCustomized, option)
 	if err != nil {
 		return response, err
 	}
 	httpResponse, err := a.sent(Constants.HOST_URL+Constants.PUSH_URI, params)
 
 	return UniCast.New(httpResponse)
-}
-
-//清單推播
-func (a *Android) ListPush(payload AnPayload, policy Policy, option Option) (response *UniCast.UniCast, err error) {
-	params, err := a.getParams(payload, policy, AnCustomized{PushType: Constants.LISTS_PUSH}, option)
-	if err != nil {
-		return response, err
-	}
-	httpResponse, err := a.sent(Constants.HOST_URL+Constants.PUSH_URI, params)
-
-	return UniCast.New(httpResponse)
-}
-
-//檔案推播
-func (a *Android) FilePush(payload AnPayload, policy Policy, option Option, fileIds []string) (response *TaskPush.TaskPush, err error) {
-	ids := strings.Join(fileIds, ",")
-	customized := AnCustomized{
-		PushType: Constants.FILE_PUSH,
-		FileId:   ids,
-	}
-	params, err := a.getParams(payload, policy, customized, option)
-	if err != nil {
-		return response, err
-	}
-	httpResponse, err := a.sent(Constants.HOST_URL+Constants.PUSH_URI, params)
-
-	return TaskPush.New(httpResponse)
-}
-
-//群組推播
-func (a *Android) GroupPush(payload AnPayload, policy Policy, option Option, filter string) (response *TaskPush.TaskPush, err error) {
-	customized := AnCustomized{
-		PushType: Constants.CUSTOMIZED_PUSH,
-		Filter:   filter,
-	}
-	params, err := a.getParams(payload, policy, customized, option)
-	if err != nil {
-		return response, err
-	}
-	httpResponse, err := a.sent(Constants.HOST_URL+Constants.PUSH_URI, params)
-
-	return TaskPush.New(httpResponse)
-}
-
-//客製推播
-func (a *Android) CustomizedPush(payload AnPayload, policy Policy, option Option, aliasType, alias, fileIds string) (response *TaskPush.TaskPush, err error) {
-	customized := AnCustomized{
-		PushType:  Constants.CUSTOMIZED_PUSH,
-		AliasType: aliasType,
-		Alias:     alias,
-		FileId:    fileIds,
-	}
-	params, err := a.getParams(payload, policy, customized, option)
-	if err != nil {
-		return response, err
-	}
-	httpResponse, err := a.sent(Constants.HOST_URL+Constants.PUSH_URI, params)
-
-	return TaskPush.New(httpResponse)
 }
 
 //推播狀態查詢
@@ -159,7 +87,7 @@ func (a *Android) PushStatus(taskId string) (response *StatusResponse.AndroidSta
 }
 
 //get params
-func (a *Android) getParams(payload AnPayload, policy Policy, customized AnCustomized, option Option) (result map[string]string, err error) {
+func (a *Android) getParams(payload *AnPayload, policy *Policy, customized *AnCustomized, option *Option) (result map[string]string, err error) {
 	p, err := json.Marshal(payload)
 	if err != nil {
 		return result, err
