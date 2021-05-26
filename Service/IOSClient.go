@@ -7,6 +7,7 @@ import (
 	"github.com/huangapple/go-umeng-push/Responses/TaskPush"
 	"github.com/huangapple/go-umeng-push/Responses/UniCast"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -44,12 +45,12 @@ type Payload struct {
 }
 
 type Customized struct {
-	DeviceTokens string `json:"device_tokens"` /// 当type=unicast时, 必填, 表示指定的单个设备 当type=listcast时, 必填, 要求不超过500个, 以英文逗号分隔
-	AliasType    string `json:"alias_type"`    // 当type=customizedcast时, 必填
-	Alias        string `json:"alias"`         // 当type=customizedcast时, 选填(此参数和file_id二选一)
-	FileId       string `json:"file_id"`       // 当type=filecast时，必填，file内容为多条device_token，以回车符分割
-	Description  string `json:"description"`   // 可选，发送消息描述，建议填写。
-	Filter       string `json:"file_id"`       // 当type=groupcast时，必填，用户筛选条件，如用户标签、渠道等，参考附录G。@see https://developer.umeng.com/docs/66632/detail/68343#h2--g-14
+	DeviceTokens []string `json:"device_tokens"` /// 当type=unicast时, 必填, 表示指定的单个设备 当type=listcast时, 必填, 要求不超过500个, 以英文逗号分隔
+	AliasType    string   `json:"alias_type"`    // 当type=customizedcast时, 必填
+	Alias        string   `json:"alias"`         // 当type=customizedcast时, 选填(此参数和file_id二选一)
+	FileId       string   `json:"file_id"`       // 当type=filecast时，必填，file内容为多条device_token，以回车符分割
+	Description  string   `json:"description"`   // 可选，发送消息描述，建议填写。
+	Filter       string   `json:"file_id"`       // 当type=groupcast时，必填，用户筛选条件，如用户标签、渠道等，参考附录G。@see https://developer.umeng.com/docs/66632/detail/68343#h2--g-14
 }
 
 //廣播
@@ -105,7 +106,7 @@ func (c *IOSClient) getParams(p *Payload, pushType string, customized *Customize
 		"appkey":          c.abstractNotification.appKey,
 		"timestamp":       strconv.FormatInt(time.Now().Unix(), 10),
 		"type":            pushType,
-		"device_tokens":   customized.DeviceTokens,
+		"device_tokens":   strings.Join(customized.DeviceTokens, ","),
 		"alias_type":      customized.AliasType,
 		"alias":           customized.Alias,
 		"file_id":         customized.FileId,
