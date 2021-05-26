@@ -3,33 +3,11 @@ package Service
 import (
 	"fmt"
 	"github.com/huangapple/go-umeng-push/Constants"
+	"testing"
 )
 
-func ExampleIOSClient_Broadcast() {
-	client := NewIOSClient("your app key", "your secret", Constants.TEST)
-	alert := AlertParams{
-		"title", "subTitle", "Body",
-	}
-	aps := ApsParams{Alert: alert}
-	payload := Payload{
-		Aps: aps,
-	}
-	push, _ := client.Broadcast(&payload)
-	defer push.Close()
-	fmt.Println(push.IsConnectSuccess())
-	fmt.Println(push.IsErrorOccur())
-	fmt.Println(push.GetErrorMessage())
-	fmt.Println(push.GetErrorCode())
-	fmt.Println(push.GetTaskId())
-	// Output:
-	//true
-	//true
-	//appkey不存在
-	//2021
-}
-
-func ExampleIOSClient_Push() {
-	client := NewIOSClient("your app key", "your secret", Constants.TEST)
+func TestIOSClient_Push(t *testing.T) {
+	client := NewIOSClient("5fe567c9adb42d58268e0f73", "crskl8vywizfgstmfjgmjnviyumktvzg", Constants.PRODUCT)
 	alert := AlertParams{
 		"title", "subTitle", "Body",
 	}
@@ -38,7 +16,9 @@ func ExampleIOSClient_Push() {
 		Aps: aps,
 	}
 
-	customized := new(Customized)
+	customized := &Customized{
+		DeviceTokens: []string{"ArlDNnd5bPmDJH_Iz1IkKN3i2E6qCWopSQWkbn6JLJLU"},
+	}
 
 	push, _ := client.Push(&payload, Constants.LISTS_PUSH, customized, &Option{
 		Description: "",
@@ -51,25 +31,4 @@ func ExampleIOSClient_Push() {
 	fmt.Println(push.GetErrorMessage())
 	fmt.Println(push.GetErrorCode())
 
-}
-func ExampleIOSClient_PushStatus() {
-	client := NewIOSClient("your app key", "your secret", Constants.TEST)
-	taskId := "your taskId"
-	push, _ := client.PushStatus(taskId)
-	defer push.Close()
-	fmt.Println(push.IsConnectSuccess())
-	fmt.Println(push.IsErrorOccur())
-	fmt.Println(push.GetErrorMessage())
-	fmt.Println(push.GetErrorCode())
-	fmt.Println(push.GetOpenCount())
-	fmt.Println(push.GetTotalCount())
-	fmt.Println(push.GetSentCount())
-	// Output:
-	//true
-	//true
-	//appkey不存在
-	//2021
-	//0
-	//0
-	//0
 }

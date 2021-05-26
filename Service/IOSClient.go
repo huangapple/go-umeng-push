@@ -1,7 +1,6 @@
 package Service
 
 import (
-	"encoding/json"
 	"github.com/huangapple/go-umeng-push/Constants"
 	"github.com/huangapple/go-umeng-push/Responses/Status"
 	"github.com/huangapple/go-umeng-push/Responses/TaskPush"
@@ -28,16 +27,16 @@ type AlertParams struct {
 }
 type ApsParams struct {
 	Alert            AlertParams `json:"alert"`             // 当content-available=1时(静默推送)，可选; 否则必填。
-	Badge            string      `json:"badge"`             // 可选
-	Sound            string      `json:"sound"`             // 可选
-	ContentAvailable int         `json:"content-available"` // 可选，代表静默推送
-	Category         string      `json:"category"`          // 可选，注意: ios8才支持该字段。
+	Badge            string      `json:"badge,omitempty"`             // 可选
+	Sound            string      `json:"sound,omitempty"`             // 可选
+	ContentAvailable int         `json:"content-available,omitempty"` // 可选，代表静默推送
+	Category         string      `json:"category,omitempty"`          // 可选，注意: ios8才支持该字段。
 }
 type PolicyParams struct {
-	StartTime      string `json:"start_time"`       // 可选，定时发送时间，若不填写表示立即发送。
-	ExpireTime     string `json:"expire_time"`      // 可选，消息过期时间，其值不可小于发送时间或者
-	OutBizNo       string `json:"out_biz_no"`       // 可选，开发者对消息的唯一标识，服务器会根据这个标识避免重复发送。
-	ApnsCollapseId string `json:"apns_collapse_id"` // 可选，多条带有相同apns_collapse_id的消息，iOS设备仅展示
+	StartTime      string `json:"start_time,omitempty"`       // 可选，定时发送时间，若不填写表示立即发送。
+	ExpireTime     string `json:"expire_time,omitempty"`      // 可选，消息过期时间，其值不可小于发送时间或者
+	OutBizNo       string `json:"out_biz_no,omitempty"`       // 可选，开发者对消息的唯一标识，服务器会根据这个标识避免重复发送。
+	ApnsCollapseId string `json:"apns_collapse_id,omitempty"` // 可选，多条带有相同apns_collapse_id的消息，iOS设备仅展示
 }
 type Payload struct {
 	Aps    ApsParams    `json:"aps"`
@@ -96,26 +95,17 @@ func (c *IOSClient) Push(payload *Payload, pushType string, customized *Customiz
 	return UniCast.New(httpResponse)
 }
 
-func (c *IOSClient) getParams(p *Payload, pushType string, customized *Customized) (map[string]string, error) {
-	b, err := json.Marshal(p)
-	if err != nil {
-		return map[string]string{}, err
-	}
+func (c *IOSClient) getParams(p *Payload, pushType string, customized *Customized) (map[string]interface{}, error) {
 
-	params := map[string]string{
-		"appkey":          c.abstractNotification.appKey,
-		"timestamp":       strconv.FormatInt(time.Now().Unix(), 10),
-		"type":            pushType,
-		"device_tokens":   strings.Join(customized.DeviceTokens, ","),
-		"alias_type":      customized.AliasType,
-		"alias":           customized.Alias,
-		"file_id":         customized.FileId,
-		"production_mode": c.abstractNotification.envMode,
-		"description":     customized.Description,
-		"filter":          customized.Filter,
-		"payload":         string(b),
+	params := map[string]interface{}{
+		"appkey":        c.abstractNotification.appKey,
+		"timestamp":     strconv.FormatInt(time.Now().Unix(), 10),
+		"type":          pushType,
+		"device_tokens": strings.Join(customized.DeviceTokens, ","),
+		"description": customized.Description,
+		"payload":     p,
 	}
-	return params, err
+	return params, nil
 
 }
 

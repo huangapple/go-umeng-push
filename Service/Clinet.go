@@ -39,7 +39,7 @@ func (n *abstractNotification) SetApp(appkey, appSecret string) *abstractNotific
 	n.appSecret = appSecret
 	return n
 }
-func (n *abstractNotification) sent(sentUrl string, params map[string]string) (*http.Response, error) {
+func (n *abstractNotification) sent(sentUrl string, params map[string]interface{}) (*http.Response, error) {
 	var resp *http.Response
 	var err error
 
@@ -51,7 +51,10 @@ func (n *abstractNotification) sent(sentUrl string, params map[string]string) (*
 	q := url.Query()
 	q.Set("sign", n.getSignature(sentUrl, params))
 	url.RawQuery = q.Encode()
-	body, err := json.Marshal(params)
+	body, _ := json.Marshal(params)
+
+	println("请求友盟body: " + string(body))
+
 	resp, err = n.httpClient.Post(url.String(), "application/json", strings.NewReader((string(body))))
 	if err != nil {
 		return resp, err
@@ -59,7 +62,7 @@ func (n *abstractNotification) sent(sentUrl string, params map[string]string) (*
 	return resp, err
 
 }
-func (n *abstractNotification) getSignature(url string, params map[string]string) string {
+func (n *abstractNotification) getSignature(url string, params map[string]interface{}) string {
 
 	jsonParams, _ := json.Marshal(params)
 	md5 := md5.New()
@@ -70,7 +73,7 @@ func (n *abstractNotification) getSignature(url string, params map[string]string
 
 func (n *abstractNotification) statusQuery(taskId string) (*http.Response, error) {
 	timestamp := strconv.FormatInt(time.Now().Unix(), 10)
-	params := map[string]string{
+	params := map[string]interface{}{
 		"appkey":    n.appKey,
 		"timestamp": timestamp,
 		"task_id":   taskId,
@@ -83,7 +86,7 @@ func (n *abstractNotification) statusQuery(taskId string) (*http.Response, error
 //@see https://developer.umeng.com/docs/66632/detail/68343#h2-u4EFBu52A1u7C7Bu6D88u606Fu53D6u6D886
 func (n *abstractNotification) ChancelPush(taskId string) (result *TaskPush.TaskPush, err error) {
 	timestamp := strconv.FormatInt(time.Now().Unix(), 10)
-	params := map[string]string{
+	params := map[string]interface{}{
 		"appkey":    n.appKey,
 		"timestamp": timestamp,
 		"task_id":   taskId,
@@ -111,7 +114,7 @@ func (n *abstractNotification) ChancelPush(taskId string) (result *TaskPush.Task
 func (n *abstractNotification) Upload(deviceTokens []string) (*Upload.Upload, error) {
 	tokens := strings.Join(deviceTokens, "\r\n")
 	timestamp := strconv.FormatInt(time.Now().Unix(), 10)
-	params := map[string]string{
+	params := map[string]interface{}{
 		"appkey":    n.appKey,
 		"timestamp": timestamp,
 		"content":   tokens,

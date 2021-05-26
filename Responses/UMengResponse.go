@@ -57,6 +57,7 @@ func (umeng *UMengResponse) IsConnectSuccess() bool {
 
 func (umeng *UMengResponse) readBody() (string, error) {
 	body, err := ioutil.ReadAll(umeng.response.Body)
+	println("友盟返回：" + string(body))
 	return string(body), err
 }
 
