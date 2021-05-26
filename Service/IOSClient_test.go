@@ -14,36 +14,13 @@ func ExampleIOSClient_Broadcast() {
 	payload := Payload{
 		Aps: aps,
 	}
-	push, _ := client.Broadcast(payload)
+	push, _ := client.Broadcast(&payload)
 	defer push.Close()
 	fmt.Println(push.IsConnectSuccess())
 	fmt.Println(push.IsErrorOccur())
 	fmt.Println(push.GetErrorMessage())
 	fmt.Println(push.GetErrorCode())
 	fmt.Println(push.GetTaskId())
-	// Output:
-	//true
-	//true
-	//appkey不存在
-	//2021
-}
-func ExampleIOSClient_UniCast() {
-	client := NewIOSClient("your app key", "your secret", Constants.TEST)
-	alert := AlertParams{
-		"title", "subTitle", "Body",
-	}
-	aps := ApsParams{Alert: alert}
-	payload := Payload{
-		Aps: aps,
-	}
-	deviceToken := "your device token"
-	push, _ := client.UniCast(payload, deviceToken)
-	defer push.Close()
-	fmt.Println(push.IsConnectSuccess())
-	fmt.Println(push.IsErrorOccur())
-	fmt.Println(push.GetErrorMessage())
-	fmt.Println(push.GetErrorCode())
-	fmt.Println(push.GetMessageId())
 	// Output:
 	//true
 	//true
@@ -51,7 +28,7 @@ func ExampleIOSClient_UniCast() {
 	//2021
 }
 
-func ExampleIOSClient_FilePush() {
+func ExampleIOSClient_Push() {
 	client := NewIOSClient("your app key", "your secret", Constants.TEST)
 	alert := AlertParams{
 		"title", "subTitle", "Body",
@@ -60,22 +37,19 @@ func ExampleIOSClient_FilePush() {
 	payload := Payload{
 		Aps: aps,
 	}
-	fileIds := []string{
-		"fileId1",
-		"fileId2",
-	}
-	push, _ := client.FilePush(payload, fileIds)
+
+	customized := new(Customized)
+
+	push, _ := client.Push(&payload, Constants.LISTS_PUSH, customized, &Option{
+		Description: "",
+		MiPush:      "",
+		MiActivity:  "",
+	})
 	defer push.Close()
 	fmt.Println(push.IsConnectSuccess())
 	fmt.Println(push.IsErrorOccur())
 	fmt.Println(push.GetErrorMessage())
 	fmt.Println(push.GetErrorCode())
-	fmt.Println(push.GetTaskId())
-	// Output:
-	//true
-	//true
-	//appkey不存在
-	//2021
 
 }
 func ExampleIOSClient_PushStatus() {

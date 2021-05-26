@@ -7,7 +7,6 @@ import (
 	"github.com/huangapple/go-umeng-push/Responses/TaskPush"
 	"github.com/huangapple/go-umeng-push/Responses/UniCast"
 	"strconv"
-	"strings"
 	"time"
 )
 
@@ -54,10 +53,10 @@ type Customized struct {
 }
 
 //廣播
-func (c *IOSClient) Broadcast(p Payload) (*TaskPush.TaskPush, error) {
+func (c *IOSClient) Broadcast(p *Payload) (*TaskPush.TaskPush, error) {
 	var result TaskPush.TaskPush
 	var err error
-	params, err := c.getParams(p, Constants.BROADCAST, Customized{})
+	params, err := c.getParams(p, Constants.BROADCAST, &Customized{})
 
 	if err != nil {
 		return &result, err
@@ -72,76 +71,31 @@ func (c *IOSClient) Broadcast(p Payload) (*TaskPush.TaskPush, error) {
 }
 
 // 單一裝置推播
-func (c *IOSClient) UniCast(p Payload, deviceToken string) (result *UniCast.UniCast, err error) {
-	params, err := c.getParams(p, Constants.UNICAST, Customized{DeviceTokens: deviceToken})
-	if err != nil {
-		return result, err
-	}
-	response, err := c.abstractNotification.sent(Constants.HOST_URL+Constants.PUSH_URI, params)
-	if err != nil {
-		return result, err
-	}
+//func (c *IOSClient) Push(p Payload, deviceToken string) (result *UniCast.UniCast, err error) {
+//	params, err := c.getParams(p, Constants.UNICAST, Customized{DeviceTokens: deviceToken})
+//	if err != nil {
+//		return result, err
+//	}
+//	response, err := c.abstractNotification.sent(Constants.HOST_URL+Constants.PUSH_URI, params)
+//	if err != nil {
+//		return result, err
+//	}
+//
+//	return UniCast.New(response)
+//
+//}
 
-	return UniCast.New(response)
+func (c *IOSClient) Push(payload *Payload, pushType string, customized *Customized, option *Option) (response *UniCast.UniCast, err error) {
+	params, err := c.getParams(payload, pushType, customized)
+	if err != nil {
+		return response, err
+	}
+	httpResponse, err := c.sent(Constants.HOST_URL+Constants.PUSH_URI, params)
 
+	return UniCast.New(httpResponse)
 }
 
-// 清單推播
-func (c *IOSClient) ListPush(p Payload, deviceToken []string) (result *UniCast.UniCast, err error) {
-	tokens := strings.Join(deviceToken, ",")
-	params, err := c.getParams(p, Constants.LISTS_PUSH, Customized{DeviceTokens: tokens})
-	if err != nil {
-		return result, err
-	}
-	response, err := c.abstractNotification.sent(Constants.HOST_URL+Constants.PUSH_URI, params)
-	if err != nil {
-		return result, err
-	}
-
-	return UniCast.New(response)
-}
-
-//客製化推播
-//@params aliasType 或 alias 其一需必填
-func (c *IOSClient) CustomizedPush(p Payload, aliasType, alias string, fileIds []string) (result *TaskPush.TaskPush, err error) {
-	ids := strings.Join(fileIds, ",")
-
-	custom := Customized{
-		Alias:     alias,
-		AliasType: aliasType,
-		FileId:    ids,
-	}
-
-	params, err := c.getParams(p, Constants.CUSTOMIZED_PUSH, custom)
-	if err != nil {
-		return result, err
-	}
-	response, err := c.abstractNotification.sent(Constants.HOST_URL+Constants.PUSH_URI, params)
-	if err != nil {
-		return result, err
-	}
-
-	return TaskPush.New(response)
-}
-
-//群組推播
-func (c *IOSClient) GroupPush(p Payload, filter string) (result *TaskPush.TaskPush, err error) {
-	custom := Customized{
-		Filter: filter,
-	}
-	params, err := c.getParams(p, Constants.GROUP_PUSH, custom)
-	if err != nil {
-		return result, err
-	}
-	response, err := c.abstractNotification.sent(Constants.HOST_URL+Constants.PUSH_URI, params)
-	if err != nil {
-		return result, err
-	}
-	return TaskPush.New(response)
-
-}
-
-func (c *IOSClient) getParams(p Payload, pushType string, customized Customized) (map[string]string, error) {
+func (c *IOSClient) getParams(p *Payload, pushType string, customized *Customized) (map[string]string, error) {
 	b, err := json.Marshal(p)
 	if err != nil {
 		return map[string]string{}, err
@@ -172,23 +126,5 @@ func (c *IOSClient) PushStatus(taskId string) (result *StatusResponse.IOSStatusR
 
 	}
 	return StatusResponse.NewIOSStatusResponse(response)
-
-}
-
-//檔案推播
-func (c *IOSClient) FilePush(p Payload, fileIds []string) (result *TaskPush.TaskPush, err error) {
-	ids := strings.Join(fileIds, ",")
-	customized := Customized{
-		FileId: ids,
-	}
-	params, err := c.getParams(p, Constants.FILE_PUSH, customized)
-	if err != nil {
-		return result, err
-	}
-	response, err := c.abstractNotification.sent(Constants.HOST_URL+Constants.PUSH_URI, params)
-	if err != nil {
-		return result, err
-	}
-	return TaskPush.New(response)
 
 }

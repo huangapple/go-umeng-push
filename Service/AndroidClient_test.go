@@ -6,7 +6,7 @@ import (
 )
 
 func ExampleAndroid_Push() {
-	anClient := NewAndroidClient("5fe5679044bb94418a6496fd", "828cce9779fbf7b9011d4af70d165cae", Constants.TEST)
+	anClient := NewAndroidClient("*", "****", Constants.TEST)
 
 	anBody := Body{
 		Ticker: "title",
