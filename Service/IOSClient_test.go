@@ -7,7 +7,7 @@ import (
 )
 
 func TestIOSClient_Push(t *testing.T) {
-	client := NewIOSClient("5fe567c9adb42d58268e0f73", "crskl8vywizfgstmfjgmjnviyumktvzg", Constants.PRODUCT)
+	client := NewIOSClient("xxx", "xxxxxx", Constants.PRODUCT)
 	alert := AlertParams{
 		"title", "subTitle", "Body",
 	}
@@ -21,9 +21,9 @@ func TestIOSClient_Push(t *testing.T) {
 	}
 
 	push, _ := client.Push(&payload, Constants.LISTS_PUSH, customized, &Option{
-		Description: "",
-		MiPush:      "",
-		MiActivity:  "",
+		Description: "这是任务描述",
+		MiPush:      true,
+		MiActivity:  "/path/xxxxx",
 	})
 	defer push.Close()
 	fmt.Println(push.IsConnectSuccess())

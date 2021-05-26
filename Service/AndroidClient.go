@@ -4,7 +4,6 @@ import (
 	"github.com/huangapple/go-umeng-push/Constants"
 	"github.com/huangapple/go-umeng-push/Responses/Status"
 	"github.com/huangapple/go-umeng-push/Responses/UniCast"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -30,7 +29,7 @@ type Body struct {
 	BuilderId   string `json:"builder_id,omitempty"`   // 可选，默认为0，用于标识该通知采用的样式。使用该参数时，开发者必须在SDK里面实现自定义通知栏样式。
 	PlayVibrate string `json:"play_vibrate,omitempty"` // 可选，收到通知是否震动，默认为"true" @see https://github.com/3rdpay/xc-golang-umeng-push/blob/master/src/Constants/Status/Vibrate/VibrateStatusConstants.go
 	PlayLights  string `json:"play_lights,omitempty"`  // 可选，收到通知是否闪灯，默认为"true" @see https://github.com/3rdpay/xc-golang-umeng-push/blob/master/src/Constants/Status/Light/LightStatusConstants.go
-	PlaySound   string `json:"play_sound,omitempty"`   // 可选，收到通知是否发出声音，默认为"true" @see https://github.com/3rdpay/xc-golang-umeng-push/blob/master/src/Constants/Status/SoundStatusConstants.go
+	PlaySound   bool   `json:"play_sound,omitempty"`   // 可选，收到通知是否发出声音，默认为"true" @see https://github.com/3rdpay/xc-golang-umeng-push/blob/master/src/Constants/Status/SoundStatusConstants.go
 	AfterOpen   string `json:"after_open,omitempty"`   // 可选，默认为"go_app" @see https://github.com/3rdpay/xc-golang-umeng-push/blob/master/src/Constants/NotifcationActiveConstants.go
 	Url         string `json:"url,omitempty"`          // 当after_open=go_url时，必填。  通知栏点击后跳转的URL，要求以http或者https开头
 	Activity    string `json:"activity,omitempty"`     // 当after_open=go_activity时，必填。
@@ -38,9 +37,9 @@ type Body struct {
 }
 
 type AnPayload struct {
-	DisplayType string `json:"display_type"`
-	Body        Body   `json:"body"`
-	Extra       string `json:"extra"`
+	DisplayType string                 `json:"display_type"`
+	Body        Body                   `json:"body"`
+	Extra       map[string]interface{} `json:"extra"`
 }
 
 type AnCustomized struct {
@@ -53,7 +52,7 @@ type AnCustomized struct {
 }
 type Option struct {
 	Description string // 可选，发送消息描述，建议填写。
-	MiPush      string // 可选，默认为false。当为true时，表示MIUI、EMUI、Flyme系统设备离线转为系统下发
+	MiPush      bool   // 可选，默认为false。当为true时，表示MIUI、EMUI、Flyme系统设备离线转为系统下发
 	MiActivity  string // 可选，mipush值为true时生效，表示走系统通道时打开指定页面acitivity的完整包路径。
 }
 
@@ -91,19 +90,21 @@ func (a *Android) getParams(payload *AnPayload, policy *Policy, customized *AnCu
 
 	result = map[string]interface{}{
 		"appkey":        a.abstractNotification.appKey,
-		"timestamp":     strconv.FormatInt(time.Now().Unix(), 10),
+		"timestamp":     time.Now().Unix() * 1000,
 		"type":          customized.PushType,
 		"device_tokens": strings.Join(customized.DeviceTokens, ","),
 		"payload":       payload,
 		"policy":        policy,
-		//"production_mode": a.abstractNotification.envMode,
-		"description": option.Description,
-		//"mipush":          option.MiPush,
-		//"mi_activity":     option.MiActivity,
 	}
+	if option.Description != "" {
+		result["description"] = option.Description
+	}
+	if option.MiPush {
+		result["mipush"] = option.MiPush
 
-	if customized.AliasType != "" {
-		result["alias_type"] = customized.AliasType
+		if option.MiActivity != "" {
+			result["mi_activity"] = option.MiActivity
+		}
 	}
 
 	return result, err

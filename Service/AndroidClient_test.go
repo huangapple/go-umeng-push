@@ -3,22 +3,35 @@ package Service
 import (
 	"fmt"
 	"github.com/huangapple/go-umeng-push/Constants"
+	"time"
 )
 
 func ExampleAndroid_Push() {
-	anClient := NewAndroidClient("5fe5679044bb94418a6496fd", "comdfsdcuaxtphtphgxjzemweictkdqr", Constants.PRODUCT)
+	anClient := NewAndroidClient("xxxx", "xxxxx", Constants.PRODUCT)
 
 	anBody := Body{
-		Ticker: "title",
-		Title:  "subTitle",
-		Text:   "Body",
+		Ticker:    "title",
+		Title:     "subTitle",
+		Text:      "Body",
+		AfterOpen: "go_activity",
+		Activity:  "/path/xxxxx",
+		PlaySound: true,
 	}
 	anPayload := AnPayload{
 		DisplayType: "notification",
 		Body:        anBody,
+		Extra: map[string]interface{}{
+			"link": "/path/xxxxx",
+		},
 	}
-	anPolicy := Policy{}
-	anOption := Option{}
+	anPolicy := Policy{
+		ExpireTime: time.Now().AddDate(0, 0, 3).Format("2006-01-02 15:04:05"),
+	}
+	anOption := Option{
+		Description: "这是任务描述",
+		MiPush:      true,
+		MiActivity:  "/path/xxxx",
+	}
 
 	anCustomized := AnCustomized{
 		PushType:     Constants.LISTS_PUSH,
