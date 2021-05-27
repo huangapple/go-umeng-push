@@ -5,7 +5,6 @@ import (
 	"github.com/huangapple/go-umeng-push/Responses/Status"
 	"github.com/huangapple/go-umeng-push/Responses/TaskPush"
 	"github.com/huangapple/go-umeng-push/Responses/UniCast"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -21,16 +20,18 @@ func NewIOSClient(appKey, appSecret, envMode string) *IOSClient {
 }
 
 type AlertParams struct {
-	Title    string `json:"title"`
-	SubTitle string `json:"subTitle"`
-	Body     string `json:"body"`
+	Title    string `json:"title,omitempty"`
+	SubTitle string `json:"subTitle,omitempty"`
+	Body     string `json:"body,omitempty"`
 }
 type ApsParams struct {
-	Alert            AlertParams `json:"alert"`             // 当content-available=1时(静默推送)，可选; 否则必填。
+	Alert            AlertParams `json:"alert"`                       // 当content-available=1时(静默推送)，可选; 否则必填。
 	Badge            string      `json:"badge,omitempty"`             // 可选
 	Sound            string      `json:"sound,omitempty"`             // 可选
 	ContentAvailable int         `json:"content-available,omitempty"` // 可选，代表静默推送
 	Category         string      `json:"category,omitempty"`          // 可选，注意: ios8才支持该字段。
+	Link             string      `json:"link,omitempty"`
+	MutableContent   int         `json:"mutable-content,omitempty"`
 }
 type PolicyParams struct {
 	StartTime      string `json:"start_time,omitempty"`       // 可选，定时发送时间，若不填写表示立即发送。
@@ -39,8 +40,7 @@ type PolicyParams struct {
 	ApnsCollapseId string `json:"apns_collapse_id,omitempty"` // 可选，多条带有相同apns_collapse_id的消息，iOS设备仅展示
 }
 type Payload struct {
-	Aps    ApsParams    `json:"aps"`
-	Policy PolicyParams `json:"policy"`
+	Aps ApsParams `json:"aps"`
 }
 
 type Customized struct {
@@ -56,7 +56,7 @@ type Customized struct {
 func (c *IOSClient) Broadcast(p *Payload) (*TaskPush.TaskPush, error) {
 	var result TaskPush.TaskPush
 	var err error
-	params, err := c.getParams(p, Constants.BROADCAST, &Customized{})
+	params, err := c.getParams(p, nil, Constants.BROADCAST, &Customized{})
 
 	if err != nil {
 		return &result, err
@@ -85,8 +85,8 @@ func (c *IOSClient) Broadcast(p *Payload) (*TaskPush.TaskPush, error) {
 //
 //}
 
-func (c *IOSClient) Push(payload *Payload, pushType string, customized *Customized, option *Option) (response *UniCast.UniCast, err error) {
-	params, err := c.getParams(payload, pushType, customized)
+func (c *IOSClient) Push(payload *Payload, policy *Policy, pushType string, customized *Customized) (response *UniCast.UniCast, err error) {
+	params, err := c.getParams(payload, policy, pushType, customized)
 	if err != nil {
 		return response, err
 	}
@@ -95,16 +95,20 @@ func (c *IOSClient) Push(payload *Payload, pushType string, customized *Customiz
 	return UniCast.New(httpResponse)
 }
 
-func (c *IOSClient) getParams(p *Payload, pushType string, customized *Customized) (map[string]interface{}, error) {
+func (c *IOSClient) getParams(p *Payload, policy *Policy, pushType string, customized *Customized) (map[string]interface{}, error) {
 
 	params := map[string]interface{}{
 		"appkey":        c.abstractNotification.appKey,
-		"timestamp":     strconv.FormatInt(time.Now().Unix(), 10),
+		"timestamp":     time.Now().Unix() * 1000,
 		"type":          pushType,
 		"device_tokens": strings.Join(customized.DeviceTokens, ","),
-		"description": customized.Description,
-		"payload":     p,
+		"description":   customized.Description,
+		"payload":       p,
 	}
+	if policy != nil {
+		params["policy"] = policy
+	}
+
 	return params, nil
 
 }
