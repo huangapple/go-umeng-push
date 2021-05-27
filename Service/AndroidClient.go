@@ -79,9 +79,9 @@ func (a *Android) PushByDeviceTokens(description, title, content, path string, d
 		Ticker:    title,
 		Title:     title,
 		Text:      content,
-		AfterOpen: "go_activity",
-		Activity:  path,
+		AfterOpen: "go_custom",
 		PlaySound: true,
+		Custom:    path,
 	}
 	anPayload := AnPayload{
 		DisplayType: "notification",
