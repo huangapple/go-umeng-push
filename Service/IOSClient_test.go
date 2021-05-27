@@ -38,3 +38,15 @@ func TestIOSClient_Push(t *testing.T) {
 	fmt.Println(push.GetErrorCode())
 
 }
+
+func TestIOSClient_PushByDeviceTokens(t *testing.T) {
+	client := NewIOSClient("xxx", "xxxxxx", Constants.PRODUCT)
+
+	push, _ := client.PushByDeviceTokens("任务描述", "标题", "内容", "/fdas", []string{"fdsa", "fdsafdsadfd"})
+	defer push.Close()
+	fmt.Println(push.IsConnectSuccess())
+	fmt.Println(push.IsErrorOccur())
+	fmt.Println(push.GetErrorMessage())
+	fmt.Println(push.GetErrorCode())
+
+}

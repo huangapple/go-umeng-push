@@ -95,6 +95,32 @@ func (c *IOSClient) Push(payload *Payload, policy *Policy, pushType string, cust
 	return UniCast.New(httpResponse)
 }
 
+func (c *IOSClient) PushByDeviceTokens(description, title, content, path string, deviceTokens []string) (response *UniCast.UniCast, err error) {
+	alert := AlertParams{
+		Title: title,
+		Body:  content,
+	}
+	aps := ApsParams{
+		Alert:          alert,
+		Sound:          "default",
+		MutableContent: 1,
+		Link:           path,
+	}
+	payload := &Payload{
+		Aps: aps,
+	}
+
+	customized := &Customized{
+		DeviceTokens: deviceTokens,
+		Description:  description,
+	}
+	policy := &Policy{
+		ExpireTime: time.Now().AddDate(0, 0, 3).Format("2006-01-02 15:04:05"),
+	}
+
+	return c.Push(payload, policy, Constants.LISTS_PUSH, customized)
+}
+
 func (c *IOSClient) getParams(p *Payload, policy *Policy, pushType string, customized *Customized) (map[string]interface{}, error) {
 
 	params := map[string]interface{}{

@@ -73,6 +73,41 @@ func (a *Android) Push(payload *AnPayload, policy *Policy, anCustomized *AnCusto
 	return UniCast.New(httpResponse)
 }
 
+func (a *Android) PushByDeviceTokens(description, title, content, path string, deviceTokens []string) (response *UniCast.UniCast, err error) {
+
+	anBody := Body{
+		Ticker:    title,
+		Title:     title,
+		Text:      content,
+		AfterOpen: "go_activity",
+		Activity:  path,
+		PlaySound: true,
+	}
+	anPayload := AnPayload{
+		DisplayType: "notification",
+		Body:        anBody,
+		Extra: map[string]interface{}{
+			"link": path,
+		},
+	}
+	anPolicy := Policy{
+		ExpireTime: time.Now().AddDate(0, 0, 3).Format("2006-01-02 15:04:05"),
+	}
+	anOption := Option{
+		Description: description,
+		MiPush:      true,
+		MiActivity:  path,
+	}
+
+	anCustomized := AnCustomized{
+		PushType:     Constants.LISTS_PUSH,
+		DeviceTokens: deviceTokens, // 当type=unicast时, 必填, 表示指定的单个设备  当type=listcast时, 必填, 要求不超过500个, 以英文逗号分隔
+
+	}
+
+	return a.Push(&anPayload, &anPolicy, &anCustomized, &anOption)
+}
+
 //推播狀態查詢
 func (a *Android) PushStatus(taskId string) (response *StatusResponse.AndroidStatusResponse, err error) {
 	httpResponse, err := a.statusQuery(taskId)
