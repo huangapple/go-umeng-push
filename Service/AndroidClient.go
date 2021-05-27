@@ -95,8 +95,8 @@ func (a *Android) PushByDeviceTokens(description, title, content, path string, d
 	}
 	anOption := Option{
 		Description: description,
-		MiPush:      true,
-		MiActivity:  path,
+		//MiPush:      true,
+		//MiActivity:  path,
 	}
 
 	anCustomized := AnCustomized{

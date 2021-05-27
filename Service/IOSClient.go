@@ -30,8 +30,8 @@ type ApsParams struct {
 	Sound            string      `json:"sound,omitempty"`             // 可选
 	ContentAvailable int         `json:"content-available,omitempty"` // 可选，代表静默推送
 	Category         string      `json:"category,omitempty"`          // 可选，注意: ios8才支持该字段。
-	Link             string      `json:"link,omitempty"`
-	MutableContent   int         `json:"mutable-content,omitempty"`
+
+	MutableContent int `json:"mutable-content,omitempty"`
 }
 type PolicyParams struct {
 	StartTime      string `json:"start_time,omitempty"`       // 可选，定时发送时间，若不填写表示立即发送。
@@ -40,7 +40,8 @@ type PolicyParams struct {
 	ApnsCollapseId string `json:"apns_collapse_id,omitempty"` // 可选，多条带有相同apns_collapse_id的消息，iOS设备仅展示
 }
 type Payload struct {
-	Aps ApsParams `json:"aps"`
+	Aps  ApsParams `json:"aps"`
+	Link string    `json:"link,omitempty"`
 }
 
 type Customized struct {
@@ -101,13 +102,13 @@ func (c *IOSClient) PushByDeviceTokens(description, title, content, path string,
 		Body:  content,
 	}
 	aps := ApsParams{
-		Alert:          alert,
-		Sound:          "default",
-		MutableContent: 1,
-		Link:           path,
+		Alert: alert,
+		Sound: "default",
+		//MutableContent: 1,
 	}
 	payload := &Payload{
-		Aps: aps,
+		Aps:  aps,
+		Link: path,
 	}
 
 	customized := &Customized{
